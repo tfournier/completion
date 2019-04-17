@@ -47,13 +47,13 @@ func (c completion) ToFile(filename string) error {
 		return err
 	}
 
-	outFile, err := os.Create(filename)
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
-	defer outFile.Close()
+	defer f.Close()
 
-	return c.ToWriter(outFile)
+	return c.ToWriter(f)
 }
 
 type command struct {
