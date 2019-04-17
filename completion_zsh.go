@@ -15,7 +15,7 @@ func zsh(cmd *command) string {
 
 func zshFunctions(cmd *command) string {
 	var function string
-	function += fmt.Sprintf("\n%s() {\n", zshFunctionsName(cmd))
+	function += fmt.Sprintf("\n%s() {\n", cmd.FullName())
 	function += fmt.Sprintf("\tlocal line\n")
 	if cmd.Name == "help" {
 		function += zshHelpFunction(cmd)
@@ -36,34 +36,8 @@ func zshFunctions(cmd *command) string {
 func zshHelpFunction(cmd *command) string {
 	var helpFunction string
 	helpFunction += fmt.Sprintf("\n\t_arguments \\\n")
-	helpFunction += fmt.Sprintf("\t\t\"1:command:(%s)\"\n", zshListAllCommands(cmd.Parent))
+	helpFunction += fmt.Sprintf("\t\t\"1:command:(%s)\"\n", strings.Join(cmd.Parent.ListSubCommands(), " "))
 	return helpFunction
-}
-
-func zshFunctionsName(cmd *command) string {
-	var parentName string
-	if cmd.HasParent() {
-		var parent = cmd.Parent
-		for {
-			parentName = fmt.Sprintf("_%s%s", parent.Name, parentName)
-			if !parent.HasParent() {
-				break
-			}
-			parent = parent.Parent
-		}
-	}
-	return fmt.Sprintf("%s_%s", parentName, cmd.Name)
-}
-
-func zshListAllCommands(cmd *command) string {
-
-	var list string
-	if cmd.HasSubCommands() {
-		for _, c := range cmd.SubCommands {
-			list += fmt.Sprintf("%s ", c.Name)
-		}
-	}
-	return strings.TrimSuffix(list, " ")
 }
 
 func zshSubCommandsInfo(cmd *command) string {
@@ -90,7 +64,7 @@ func zshSubCommandsLink(cmd *command) string {
 				}
 				return res
 			}
-			subCommandsLink += fmt.Sprintf("\t\t%s%s)\n\t\t\t%s\n\t\t\t;;\n", c.Name, alias(c.Alias), zshFunctionsName(c))
+			subCommandsLink += fmt.Sprintf("\t\t%s%s)\n\t\t\t%s\n\t\t\t;;\n", c.Name, alias(c.Alias), c.FullName())
 		}
 		subCommandsLink += fmt.Sprintf("\tesac\n")
 	}
